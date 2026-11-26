@@ -1,0 +1,7 @@
+# Se quedan solo en el PC: el Excel, la clave, los respaldos y el túnel
+datos/
+herramientas/
+__pycache__/
+*.pyc
+~$*
+.claude/

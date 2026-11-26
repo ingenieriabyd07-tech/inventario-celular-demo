@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inventario Asepsia</title>
+<meta name="theme-color" content="#f3f5f6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1417" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Inventario">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icono-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+/* Una columna para el celular: estado, cámara, registrar, inventario y movimientos */
+:root{
+  --bg:#f3f5f6; --card:#ffffff; --card-2:#eef2f4; --ink:#13191d; --ink-2:#3b4750; --muted:#62707a; --line:#d6dee3;
+  --code:#f2b705; --code-ink:#1b1500; --btn:#13191d; --btn-fg:#ffffff; --sel:#fff5d1;
+  --ok:#1d7643; --ok-soft:#dbefe2; --bad:#ad2f1b; --bad-soft:#f8dfda; --warn:#965700; --warn-soft:#f7e8cf;
+  --font:"Barlow","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1417; --card:#161d21; --card-2:#1d262b; --ink:#e6ebee; --ink-2:#bac5cb; --muted:#8a979f; --line:#28333a;
+    --btn:#f2b705; --btn-fg:#1b1500; --sel:#2a2510;
+    --ok:#6fc596; --ok-soft:#14301f; --bad:#f08a76; --bad-soft:#3a1b15; --warn:#e3a84e; --warn-soft:#37280f;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45;
+  padding:env(safe-area-inset-top,0px) max(14px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 24px) max(14px,env(safe-area-inset-left,0px));}
+button,input,select{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--code);outline-offset:2px}
+.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.wrap{max-width:560px;margin:0 auto;display:grid;gap:14px;padding-top:12px}
+.top{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0}
+.mark{width:38px;height:38px;border-radius:10px;background:var(--code);color:var(--code-ink);display:grid;place-items:center;font-weight:700;letter-spacing:.04em;flex:none}
+.brand{margin-right:auto;min-width:0}
+.brand b{display:block;font-size:1.08rem;line-height:1.15}
+.brand small{color:var(--muted);font-size:.84rem}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:650;border-radius:999px;padding:5px 11px;background:var(--card-2);color:var(--ink-2);white-space:nowrap}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+h1{margin:0;font-size:1.4rem;line-height:1.15}
+h2{margin:0;font-size:1.12rem}
+p{margin:0}
+.sub{color:var(--ink-2)}
+small,.mut{color:var(--muted);font-size:.85rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:12px 16px;font-weight:650;background:var(--btn);color:var(--btn-fg);cursor:pointer;min-height:46px}
+.btn:disabled{opacity:.4}
+.btn.ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line);min-height:40px;padding:8px 12px}
+.btn.full{width:100%}
+.cam{position:relative;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--card-2);display:grid;place-items:center}
+.cam img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam p{color:var(--muted);text-align:center;padding:0 24px;font-size:.92rem}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;background:var(--card-2);border-radius:12px;padding:4px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:10px 4px;font-weight:650;color:var(--ink-2);cursor:pointer}
+.seg button[aria-checked="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+label.f{display:grid;gap:5px}
+label.f > span{font-size:.86rem;font-weight:650;color:var(--ink-2)}
+input,select{width:100%;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card-2);font-size:16px}
+.unit-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.unit-in .u{color:var(--muted);min-width:2.4rem}
+.calc{background:var(--card-2);border-radius:10px;padding:11px 13px;font-size:.94rem;color:var(--ink-2)}
+.calc.err{color:var(--bad);font-weight:600}
+.status{font-weight:650;font-size:.94rem}
+.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}
+.inv{list-style:none;margin:0;padding:0;display:grid}
+.inv li button{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;padding:11px 2px;cursor:pointer}
+.inv li:last-child button{border-bottom:0}
+.inv .n{font-weight:600}
+.inv .q{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;white-space:nowrap}
+.inv .d{grid-column:1 / -1;display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.84rem}
+.chip{font-size:.74rem;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--bad-soft);color:var(--bad)}
+.mov{list-style:none;margin:0;padding:0;display:grid}
+.mov li{padding:10px 0;border-bottom:1px solid var(--line);display:grid;gap:2px}
+.mov li:last-child{border-bottom:0}
+.mov .l1{display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.mov .l1 span:last-child{font-variant-numeric:tabular-nums;white-space:nowrap}
+.mov .l2{color:var(--muted);font-size:.84rem}
+.foot{display:grid;gap:10px;justify-items:start;padding:6px 2px 10px}
+.empty{color:var(--muted)}
+.hero{display:grid;gap:14px;padding-top:28px}
+.steps{margin:0;padding-left:1.2rem;display:grid;gap:6px;color:var(--ink-2)}
+details summary{cursor:pointer;color:var(--ink-2);font-weight:600}
+details[open] summary{margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Emparejar el celular -->
+  <section id="vista-conectar" class="hero" hidden>
+    <div style="display:flex;align-items:center;gap:10px"><span class="mark" aria-hidden="true">AT</span><div><b>Asepsia Total</b><br><small>Inventario de ejemplo</small></div></div>
+    <h1>Conecte este celular con el PC</h1>
+    <ol class="steps">
+      <li>En el PC, abra <b>Iniciar puente</b>. Se abre una página con un código QR.</li>
+      <li>Escanee ese código con la cámara del celular.</li>
+      <li>Listo: el celular queda conectado y no hay que repetirlo.</li>
+    </ol>
+    <details class="card">
+      <summary>Conectar escribiendo la dirección</summary>
+      <div style="display:grid;gap:12px">
+        <label class="f"><span>Dirección del puente</span><input id="c-url" type="url" inputmode="url" autocomplete="off" placeholder="https://...trycloudflare.com"></label>
+        <label class="f"><span>Clave</span><input id="c-clave" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+        <button type="button" class="btn full" id="c-ok"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>Conectar</button>
+        <p class="status bad" id="c-st" role="status"></p>
+      </div>
+    </details>
+  </section>
+
+  <!-- Aplicación -->
+  <div id="vista-app" hidden style="display:grid;gap:14px">
+    <header class="top">
+      <span class="mark" aria-hidden="true">AT</span>
+      <div class="brand"><b>Asepsia Total</b><small id="t-hora">Inventario de ejemplo</small></div>
+      <span class="pill" id="estado">Conectando</span>
+    </header>
+
+    <section class="card">
+      <div class="card-h"><h2>Cámara del PC</h2>
+        <button type="button" class="btn ghost" id="cam-btn"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 10l5-3v10l-5-3zM3 7h12v10H3z"/></svg><span>Ver en vivo</span></button></div>
+      <div class="cam"><img id="cam-img" alt="Imagen en vivo de la cámara del PC" hidden><p id="cam-msg">La cámara está apagada. Toque Ver en vivo para encenderla.</p></div>
+      <small id="cam-info">Se pausa sola a los 3 minutos para ahorrar datos.</small>
+    </section>
+
+    <section class="card" id="registrar">
+      <h2>Registrar en el Excel</h2>
+      <div class="seg" role="radiogroup" aria-label="Tipo de movimiento">
+        <button type="button" role="radio" aria-checked="true" data-t="producido">Producido</button>
+        <button type="button" role="radio" aria-checked="false" data-t="empacado">Empacado</button>
+        <button type="button" role="radio" aria-checked="false" data-t="descontado">Descontado</button>
+      </div>
+      <label class="f"><span>Producto</span><select id="f-prod"></select></label>
+      <label class="f"><span>Cantidad</span><span class="unit-in"><input id="f-cant" type="text" inputmode="decimal" autocomplete="off" placeholder="0"><span class="u" id="f-u"></span></span></label>
+      <label class="f"><span id="f-nota-l">Nota (opcional)</span><input id="f-nota" type="text" autocomplete="off" maxlength="120"></label>
+      <div class="calc" id="f-calc" aria-live="polite"></div>
+      <button type="button" class="btn full" id="f-ok"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Registrar en el Excel</button>
+      <p class="status" id="f-st" role="status"></p>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h2>Inventario</h2><small id="inv-info"></small></div>
+      <ul class="inv" id="inv"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Últimos movimientos</h2>
+      <ol class="mov" id="mov"></ol>
+    </section>
+
+    <div class="foot">
+      <small>Ejemplo de prueba: el inventario es un Excel del PC y la cámara es la del PC. Funciona mientras el puente esté abierto en el PC.</small>
+      <button type="button" class="btn ghost" id="salir"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h5M15 7l5 5-5 5M20 12H9"/></svg><span>Desconectar este celular</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var LS = 'asepsia-demo-celular';
+var cfg = cargar();
+var datos = {productos:[], movimientos:[]};
+var tipo = 'producido', conectado = false, fallos = 0, ocupado = false;
+var camOn = false, camT = null, camURL = null, camInicio = 0, camFallos = 0;
+
+function $(s){ return document.querySelector(s); }
+function cargar(){ try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch(e){ return {}; } }
+function guardar(){ try { localStorage.setItem(LS, JSON.stringify(cfg)); } catch(e){} }
+function esc(t){ return String(t).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function limpiaURL(u){ return String(u || '').trim().replace(/\/+$/, ''); }
+function fmt(x){
+  var r = Math.round(x * 100) / 100, d = Number.isInteger(r) ? 0 : (Number.isInteger(r * 10) ? 1 : 2);
+  var s = Math.abs(r).toFixed(d).split('.');
+  return (r < 0 ? '-' : '') + s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (s[1] ? ',' + s[1] : '');
+}
+function num(v){ v = String(v || '').trim().replace(/\s/g, ''); if (!v) return 0; if (v.indexOf(',') >= 0) v = v.replace(/\./g, '').replace(',', '.'); var n = Number(v); return isFinite(n) ? n : NaN; }
+function hora(d){ d = d || new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0'); }
+
+/* --- Emparejar desde el código QR (#s=dirección&k=clave) --- */
+(function(){
+  var h = new URLSearchParams(location.hash.slice(1));
+  if (h.get('s') && h.get('k')){
+    cfg = {s: limpiaURL(h.get('s')), k: h.get('k')}; guardar();
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+})();
+
+/* --- Llamadas al puente --- */
+function api(ruta, op){
+  op = op || {};
+  var ctrl = new AbortController(), t = setTimeout(function(){ ctrl.abort(); }, op.espera || 9000);
+  var cab = {'X-Clave': cfg.k};
+  if (op.cuerpo) cab['Content-Type'] = 'application/json';
+  return fetch(cfg.s + ruta, {method: op.cuerpo ? 'POST' : 'GET', headers: cab, body: op.cuerpo ? JSON.stringify(op.cuerpo) : undefined, signal: ctrl.signal, cache: 'no-store'})
+    .then(function(r){
+      if (r.status === 401){ var e = new Error('La clave no coincide. Vuelva a escanear el código del PC.'); e.clave = true; throw e; }
+      if (op.imagen){ if (!r.ok) throw new Error('Sin imagen'); return r.blob(); }
+      return r.json().then(function(j){ if (!r.ok){ var e2 = new Error(j.error || 'Error del puente'); e2.puente = true; throw e2; } return j; });
+    })
+    .finally(function(){ clearTimeout(t); });
+}
+// Si el túnel cambió de dirección, el PC la publica en servidor.json (junto a esta página).
+function redescubrir(){
+  return fetch('servidor.json?t=' + Date.now(), {cache: 'no-store'}).then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){ if (j && j.url && limpiaURL(j.url) !== cfg.s){ cfg.s = limpiaURL(j.url); guardar(); return true; } return false; })
+    .catch(function(){ return false; });
+}
+
+function estado(cls, txt){ var p = $('#estado'); p.className = 'pill' + (cls ? ' ' + cls : ''); p.textContent = txt; }
+
+function refrescar(){
+  if (ocupado) return Promise.resolve();
+  return api('/api/inventario').then(function(d){
+    datos = d; conectado = true; fallos = 0; pintar();
+    estado('ok', 'Conectado al PC'); $('#t-hora').textContent = 'Actualizado ' + hora();
+  }).catch(function(e){
+    conectado = false;
+    if (e.clave){ estado('bad', 'Clave incorrecta'); $('#t-hora').textContent = e.message; return; }
+    fallos++; estado('bad', 'Sin conexión');
+    $('#t-hora').textContent = 'Revise que el puente esté abierto en el PC';
+    if (fallos === 1 || fallos % 4 === 0) return redescubrir().then(function(cambio){ if (cambio) return refrescar(); });
+  });
+}
+
+/* --- Pintar inventario y movimientos --- */
+function prodPorCodigo(c){ for (var i = 0; i < datos.productos.length; i++) if (datos.productos[i].codigo === c) return datos.productos[i]; return null; }
+function pintar(){
+  $('#inv').innerHTML = datos.productos.map(function(p){
+    var bajo = p.existencia < p.minimo;
+    return '<li><button type="button" data-c="' + esc(p.codigo) + '"><span class="n">' + esc(p.producto) + '</span><span class="q">' + fmt(p.existencia) + ' ' + esc(p.unidad) + '</span>' +
+      '<span class="d">' + (bajo ? '<span class="chip">Bajo el mínimo</span>' : '') + 'Mínimo ' + fmt(p.minimo) + ' ' + esc(p.unidad) + '</span></button></li>';
+  }).join('');
+  $('#inv-info').textContent = datos.productos.length + ' productos';
+  $('#mov').innerHTML = datos.movimientos.length ? datos.movimientos.map(function(m){
+    return '<li><div class="l1"><span>' + esc(m.tipo) + ' · ' + esc(m.producto) + '</span><span>' + (m.cantidad > 0 ? '+' : '') + fmt(m.cantidad) + ' ' + esc(m.unidad) + '</span></div>' +
+      '<div class="l2">' + esc(m.fecha) + ' ' + esc(m.hora) + ' · ' + esc(m.desde) + (m.nota ? ' · ' + esc(m.nota) : '') + '</div></li>';
+  }).join('') : '<li class="empty">Todavía no hay movimientos.</li>';
+  opciones();
+}
+
+/* --- Formulario --- */
+function opciones(){
+  var sel = $('#f-prod'), antes = sel.value;
+  var lista = tipo === 'empacado' ? datos.productos.filter(function(p){ return p.origen && p.contenido; }) : datos.productos;
+  sel.innerHTML = lista.map(function(p){ return '<option value="' + esc(p.codigo) + '">' + esc(p.producto) + '</option>'; }).join('');
+  if (antes && lista.some(function(p){ return p.codigo === antes; })) sel.value = antes;
+  previa();
+}
+function calcular(){
+  var p = prodPorCodigo($('#f-prod').value);
+  if (!p) return {msg:'Cargando productos del PC...'};
+  $('#f-u').textContent = p.unidad;
+  var c = num($('#f-cant').value);
+  if (isNaN(c) || c < 0) return {err:'Escriba la cantidad con un número, por ejemplo 2 o 2,5.'};
+  if (!c) return {msg:'Escriba la cantidad.'};
+  if (p.unidad === 'und' && !Number.isInteger(c)) return {err:'Este producto se cuenta en unidades enteras.'};
+  if (tipo === 'producido') return {ok:true, c:c, txt:'Entran ' + fmt(c) + ' ' + p.unidad + ' a ' + p.producto + '. Quedará en ' + fmt(p.existencia + c) + ' ' + p.unidad + '.'};
+  if (tipo === 'descontado'){
+    if (c > p.existencia) return {err:'No alcanza: hay ' + fmt(p.existencia) + ' ' + p.unidad + '.'};
+    return {ok:true, c:c, txt:'Salen ' + fmt(c) + ' ' + p.unidad + ' de ' + p.producto + '. Quedará en ' + fmt(p.existencia - c) + ' ' + p.unidad + '.'};
+  }
+  var o = prodPorCodigo(p.origen), usa = c * p.contenido;
+  if (!o) return {err:'No encuentro el granel de este producto en el Excel.'};
+  if (usa > o.existencia + 1e-9) return {err:'No alcanza el granel: hay ' + fmt(o.existencia) + ' ' + o.unidad + ' y se necesitan ' + fmt(usa) + '.'};
+  return {ok:true, c:c, txt:'Salen ' + fmt(usa) + ' ' + o.unidad + ' de ' + o.producto + ' y entran ' + fmt(c) + ' ' + p.unidad + ' de ' + p.producto + '.'};
+}
+function previa(){
+  var r = calcular(), el = $('#f-calc');
+  el.className = 'calc' + (r.err ? ' err' : '');
+  el.textContent = r.err || r.msg || r.txt;
+  $('#f-ok').disabled = !r.ok || !conectado;
+  return r;
+}
+function registrar(){
+  var r = previa(); if (!r.ok) return;
+  var st = $('#f-st'), b = $('#f-ok');
+  b.disabled = true; ocupado = true; st.className = 'status'; st.textContent = 'Guardando en el Excel...';
+  api('/api/movimiento', {cuerpo:{tipo:tipo, codigo:$('#f-prod').value, cantidad:r.c, nota:$('#f-nota').value.trim()}})
+    .then(function(d){
+      datos = d; ocupado = false; pintar();
+      $('#f-cant').value = ''; $('#f-nota').value = ''; previa();
+      st.className = 'status ok'; st.textContent = 'Registrado en el Excel a las ' + hora().slice(0, 5) + '.';
+    })
+    .catch(function(e){ ocupado = false; st.className = 'status bad'; st.textContent = e.puente || e.clave ? e.message : 'No llegó al PC. Revise la conexión y vuelva a intentar.'; previa(); });
+}
+function ponerTipo(t){
+  tipo = t;
+  document.querySelectorAll('.seg button').forEach(function(b){ b.setAttribute('aria-checked', b.dataset.t === t ? 'true' : 'false'); });
+  $('#f-nota-l').textContent = t === 'descontado' ? 'Motivo (opcional)' : 'Nota (opcional)';
+  $('#f-nota').placeholder = t === 'descontado' ? 'Consumo de la casa, derrame, muestra...' : '';
+  $('#f-st').textContent = '';
+  opciones();
+}
+
+/* --- Cámara --- */
+function camara(on){
+  camOn = on; clearTimeout(camT);
+  $('#cam-btn span').textContent = on ? 'Pausar' : 'Ver en vivo';
+  if (on){ camInicio = Date.now(); camFallos = 0; $('#cam-msg').textContent = 'Encendiendo la cámara del PC...'; cuadro(); }
+  else { $('#cam-info').textContent = 'Cámara en pausa.'; }
+}
+function cuadro(){
+  if (!camOn) return;
+  if (Date.now() - camInicio > 180000){ camara(false); $('#cam-info').textContent = 'Se pausó a los 3 minutos para ahorrar datos.'; return; }
+  var t0 = Date.now();
+  api('/api/camara', {imagen:true, espera:10000}).then(function(b){
+    if (!camOn) return;
+    var u = URL.createObjectURL(b), img = $('#cam-img');
+    img.onload = function(){ if (camURL && camURL !== u) URL.revokeObjectURL(camURL); camURL = u; };
+    img.src = u; img.hidden = false; $('#cam-msg').hidden = true; camFallos = 0;
+    $('#cam-info').textContent = 'En vivo · ' + hora();
+  }).catch(function(e){
+    camFallos++;
+    if (e.clave){ camara(false); $('#cam-info').textContent = e.message; return; }
+    $('#cam-info').textContent = 'No se pudo leer la cámara del PC.';
+    if (camFallos >= 5){ camara(false); $('#cam-info').textContent = 'La cámara no responde. Revise el puente en el PC.'; }
+  }).finally(function(){ if (camOn) camT = setTimeout(cuadro, Math.max(200, 800 - (Date.now() - t0))); });
+}
+
+/* --- Vistas --- */
+function mostrar(){
+  var hay = !!(cfg.s && cfg.k);
+  $('#vista-conectar').hidden = hay; $('#vista-app').hidden = !hay;
+  if (hay){ estado('', 'Conectando'); refrescar(); }
+}
+
+$('#c-ok').addEventListener('click', function(){
+  var u = limpiaURL($('#c-url').value), k = $('#c-clave').value.trim();
+  if (!/^https:\/\/|^http:\/\/localhost/.test(u)){ $('#c-st').textContent = 'La dirección debe empezar por https://'; return; }
+  if (!k){ $('#c-st').textContent = 'Escriba la clave que muestra el PC.'; return; }
+  cfg = {s:u, k:k}; guardar(); mostrar();
+});
+document.querySelectorAll('.seg button').forEach(function(b){ b.addEventListener('click', function(){ ponerTipo(b.dataset.t); }); });
+$('#f-prod').addEventListener('change', function(){ $('#f-st').textContent = ''; previa(); });
+$('#f-cant').addEventListener('input', previa);
+$('#f-ok').addEventListener('click', registrar);
+$('#inv').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-c]'); if (!b) return;
+  var p = prodPorCodigo(b.dataset.c);
+  if (tipo === 'empacado' && !(p && p.origen)) ponerTipo('producido');
+  $('#f-prod').value = b.dataset.c; previa();
+  $('#registrar').scrollIntoView({behavior:'smooth', block:'start'});
+});
+$('#cam-btn').addEventListener('click', function(){ camara(!camOn); });
+var confirmarSalida = false;
+$('#salir').addEventListener('click', function(){
+  var t = $('#salir span');
+  if (!confirmarSalida){ confirmarSalida = true; t.textContent = 'Toque otra vez para desconectar'; setTimeout(function(){ confirmarSalida = false; t.textContent = 'Desconectar este celular'; }, 4000); return; }
+  camara(false); cfg = {}; try { localStorage.removeItem(LS); } catch(e){} confirmarSalida = false; t.textContent = 'Desconectar este celular'; mostrar();
+});
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'visible'){ if (cfg.s) refrescar(); }
+  else if (camOn) camara(false);
+});
+setInterval(function(){ if (document.visibilityState === 'visible' && cfg.s && cfg.k) refrescar(); }, 5000);
+mostrar();
+})();
+</script>
+</body>
+</html>
