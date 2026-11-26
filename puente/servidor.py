@@ -350,6 +350,14 @@ def enlace_celular():
     return f"{PAGINA_CELULAR}#s={quote(ESTADO['tunel'], safe='')}&k={quote(CLAVE, safe='')}"
 
 
+def enlace_tunel_directo():
+    # La misma página servida por el puente a través del túnel; no depende de GitHub Pages.
+    if not ESTADO["tunel"]:
+        return ""
+    t = ESTADO["tunel"]
+    return f"{t}/app/#s={quote(t, safe='')}&k={quote(CLAVE, safe='')}"
+
+
 def enlace_local():
     return f"http://localhost:{PUERTO}/app/#s={quote(f'http://localhost:{PUERTO}', safe='')}&k={quote(CLAVE, safe='')}"
 
@@ -367,9 +375,14 @@ def pagina_conectar():
     tunel = ESTADO["tunel"]
     qr = qr_png_base64(enlace_celular())
     if tunel:
+        qr_b = qr_png_base64(enlace_tunel_directo())
         bloque = (f'<img src="data:image/png;base64,{qr}" alt="Código QR para el celular" width="300" height="300">'
                   f'<p>Escanee este código con la cámara del celular. Queda guardado y no hay que repetirlo, '
-                  f'salvo que cambie la clave.</p><p class="mut">Túnel activo: {tunel}</p>')
+                  f'salvo que cambie la clave.</p><p class="mut">Túnel activo: {tunel}</p>'
+                  f'<details><summary>Plan B: si GitHub Pages muestra 404</summary>'
+                  f'<img src="data:image/png;base64,{qr_b}" alt="Código QR directo por el túnel" width="220" height="220">'
+                  f'<p class="mut">Abre la misma página directo por el túnel. Sirve mientras GitHub termina de publicar, '
+                  f'pero hay que volver a escanearlo cada vez que se reinicia el puente.</p></details>')
     elif ESTADO["tunel_error"]:
         bloque = f'<p class="err">{ESTADO["tunel_error"]}</p>'
     else:
@@ -380,7 +393,7 @@ def pagina_conectar():
 <style>body{{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#f3f5f6;color:#13191d;margin:0;display:grid;place-items:center;min-height:100vh}}
 main{{background:#fff;border:1px solid #d6dee3;border-radius:14px;padding:28px;max-width:460px;display:grid;gap:12px;justify-items:center;text-align:center}}
 h1{{font-size:1.35rem;margin:0}}.mut{{color:#62707a;font-size:.88rem;word-break:break-all}}.err{{color:#ad2f1b;font-weight:600}}
-a{{color:#1b5ca4}}</style></head><body><main>
+a{{color:#1b5ca4}}details{{border-top:1px solid #d6dee3;padding-top:10px;width:100%}}summary{{cursor:pointer;font-weight:600;color:#3b4750}}</style></head><body><main>
 <h1>Conectar el celular al puente</h1>{bloque}
 <p class="mut">Para probar en este PC: <a href="{enlace_local()}">abrir la página aquí</a>.</p>
 <p class="mut">No muestre este código a nadie más: quien lo escanee puede ver la cámara y mover el inventario.</p>
